@@ -9,7 +9,7 @@ configDotenv();
 
 export async function GET(req: NextRequest) {
   console.log("GitHub Action pinged.");
-  console.log(`Running in ${process.env.VERCEL_ENV}.`)
+  console.log(`Running in ${process.env.VERCEL_ENV ?? "development (local)"}.`)
   // const msg = (await req.json()).message;
   // const chatId = msg.chat.id;
 
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
   const mainPage = await ctx.newPage()
   await (new LoginTask(mainPage)).execute()
-  await (new PollForNewsFeedTask(mainPage)).execute()
+  // await (new PollForNewsFeedTask(mainPage)).execute()
   
   try {
     return new Response("OK", { status: 200 });

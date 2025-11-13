@@ -23,15 +23,13 @@ export class LoginTask extends Task {
     
     // 2) No saved cookies
     console.log("Refreshing cookies and persisting in Redis.")
-    const loginUrl = new URL('/my-account/edit-account/', k.BASE_URL).toString()
-    await this.page.goto(loginUrl)
+    await this.page.goto(new URL('/my-account/edit-account/', k.BASE_URL).toString())
     await this.page.screenshot({ path: `${k.CWD_PATH}/screenshot.png` });
 
     const username = process.env.WP_USERNAME
     const password = process.env.WP_PASSWORD
     if (!username || !password) throw Error("Environment variables for username and password not set.")
 
-    // Fill and submit the standard WP login form. Adjust selectors if customized.
     await this.page.locator('.entry-content #username').fill(username)
     await this.page.locator('.entry-content #password').fill(password)
     await this.page.locator('.entry-content #rememberme').check()
@@ -50,9 +48,10 @@ export class LoginTask extends Task {
       const key = c.name
       const value = c.value
       if (c.expires && c.expires > 0) {
-        const expiresAt = c.expires // Playwright exposes expires as seconds since epoch
+        const expiresAt = Math.floor(c.expires) // Playwright exposes c.expires in seconds since epoch
+        const adjustedExpiresAt = expiresAt - 864_000 // Shift expiry forward by 10 days (10d * 24h * 60min * 60s = 864000s)
         const nowSec = Math.floor(Date.now() / 1000)
-        const ttl = Math.max(0, Math.floor(expiresAt - nowSec))
+        const ttl = Math.max(0, Math.floor(adjustedExpiresAt - nowSec))
         if (ttl > 0) {
           await redis.set(key, value, { ex: ttl })
           continue
