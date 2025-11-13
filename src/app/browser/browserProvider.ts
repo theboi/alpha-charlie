@@ -1,4 +1,4 @@
-import { BrowserContext, chromium, ChromiumBrowser, Page } from "playwright-core";
+import { BrowserContext, chromium, ChromiumBrowser } from "playwright-core";
 import chromiumBinary from "@sparticuz/chromium";
 import topUserAgents from "top-user-agents";
 
@@ -21,7 +21,9 @@ export class BrowserProvider {
 
   async readyBrowser() {
     console.log("Readying Browser...")
-    if (!this.browser || !this.context) {
+    // TODO: chromiumBinary.executablePath() throws an error
+    console.log(isProduction, await chromiumBinary.executablePath())
+    if (!this.browser || !this.context) {  
       this.browser = await chromium.launch({
         executablePath: isProduction ? await chromiumBinary.executablePath() : process.env.CHROME_EXECUTABLE_PATH,
         headless: true, //isProduction,
