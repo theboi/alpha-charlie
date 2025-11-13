@@ -4,9 +4,11 @@ import { BrowserProvider } from "../browser/browserProvider";
 
 configDotenv();
 const isProduction = process.env.VERCEL_ENV === "production";
+const cwdPath = isProduction ? `/tmp` : `./tmp`;
 
 export async function GET(req: NextRequest) {
   console.log("GitHub Action pinged.");
+  console.log(`Running in ${isProduction ? "production" : "development"}.`)
   // const msg = (await req.json()).message;
   // const chatId = msg.chat.id;
 
@@ -15,7 +17,7 @@ export async function GET(req: NextRequest) {
   await browserProvider.readyBrowser();
   const mainPage = await browserProvider.context!.newPage();
   await mainPage.goto("https://bravosresearch.com");
-  await mainPage.screenshot({ path: "./screenshot.png" });
+  await mainPage.screenshot({ path: `${cwdPath}/screenshot.png` });
 
   try {
     return new Response("OK", { status: 200 });
