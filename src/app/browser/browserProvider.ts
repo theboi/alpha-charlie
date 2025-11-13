@@ -2,7 +2,7 @@ import { BrowserContext, chromium, ChromiumBrowser } from "playwright-core";
 import chromiumBinary from "@sparticuz/chromium";
 import topUserAgents from "top-user-agents";
 
-const isProduction = process.env.VERCEL_ENV === "production";
+const isProductionOrPreview = process.env.VERCEL_ENV === "production" || process.env.VERCEL_ENV === "preview";
 
 export class BrowserProvider {
   private static provider: BrowserProvider
@@ -21,13 +21,11 @@ export class BrowserProvider {
 
   async readyBrowser() {
     console.log("Readying Browser...")
-    // TODO: chromiumBinary.executablePath() throws an error
-    console.log(isProduction, await chromiumBinary.executablePath())
     if (!this.browser || !this.context) {  
       this.browser = await chromium.launch({
-        executablePath: isProduction ? await chromiumBinary.executablePath() : process.env.CHROME_EXECUTABLE_PATH,
+        executablePath: isProductionOrPreview ? await chromiumBinary.executablePath() : process.env.CHROME_EXECUTABLE_PATH,
         headless: true, //isProduction,
-        args: isProduction ? chromiumBinary.args : ["--start-maximized"],
+        args: isProductionOrPreview ? chromiumBinary.args : ["--start-maximized"],
       });
       this.context = await this.browser.newContext({
         viewport: {
