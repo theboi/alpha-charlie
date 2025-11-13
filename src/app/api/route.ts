@@ -1,12 +1,11 @@
 import { NextRequest } from "next/server";
 import { configDotenv } from "dotenv";
 import { BrowserProvider } from "../browser/browserProvider";
-import { Redis } from '@upstash/redis'
 import { LoginTask } from "../browser/loginTask";
 import { k } from "../globals";
+import { PollForNewsFeedTask } from "../browser/pollForNewsFeedTask";
 
 configDotenv();
-const redis = Redis.fromEnv();
 
 export async function GET(req: NextRequest) {
   console.log("GitHub Action pinged.");
@@ -19,8 +18,8 @@ export async function GET(req: NextRequest) {
   const ctx = await browserProvider.getContext();
 
   const mainPage = await ctx.newPage()
-  const login = new LoginTask(mainPage)
-  await login.execute()
+  await (new LoginTask(mainPage)).execute()
+  await (new PollForNewsFeedTask(mainPage)).execute()
   
   try {
     return new Response("OK", { status: 200 });

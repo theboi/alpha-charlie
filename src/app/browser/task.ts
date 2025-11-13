@@ -7,5 +7,5 @@ export abstract class Task {
     this.page = page
   }
 
-  async execute() {}
+  abstract execute(): Promise<void>
 }

@@ -18,7 +18,6 @@ export class LoginTask extends Task {
         { name: loggedInKey, value: String(redis.get(loggedInKey)), url: k.BASE_URL },
         { name: secKey, value: String(redis.get(secKey)), url: k.BASE_URL }
       ])
-
       return
     }
     
