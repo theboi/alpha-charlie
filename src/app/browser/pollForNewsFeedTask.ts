@@ -35,7 +35,7 @@ export class PollForNewsFeedTask extends Task {
 
     try {
       return ext.posts.map((p) => ({
-        id: p.url!.replace(/\/([^\/]*)\/?$/, "$1"),
+        id: p.url!.match(/\/([^\/]*\/[^\/]*)\/?$/)![1],
         tag: p.tag!.toLowerCase().replace(" ", "-") as NewsFeedTag,
         title: p.title!.trim(),
         date: new Date(p.date!),
