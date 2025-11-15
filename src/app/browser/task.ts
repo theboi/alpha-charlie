@@ -6,6 +6,4 @@ export abstract class Task {
   constructor(page: Page) {
     this.page = page
   }
-
-  abstract execute(): Promise<void>
 }

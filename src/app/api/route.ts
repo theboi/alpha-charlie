@@ -4,6 +4,7 @@ import { BrowserProvider } from "../browser/browserProvider";
 import { LoginTask } from "../browser/loginTask";
 import { k } from "../globals";
 import { PollForNewsFeedTask } from "../browser/pollForNewsFeedTask";
+import { OpenNewsFeedTask } from "../browser/openNewsFeedTask";
 
 configDotenv();
 
@@ -19,8 +20,11 @@ export async function GET(req: NextRequest) {
 
   const mainPage = await ctx.newPage()
   await (new LoginTask(mainPage)).execute()
-  // await (new PollForNewsFeedTask(mainPage)).execute()
-  
+  // const posts = await (new PollForNewsFeedTask(mainPage)).execute()
+  // console.log(posts)
+  const post = await (new OpenNewsFeedTask(mainPage)).execute("https://bravosresearch.com/news-feed/initiating-long-on-roku-inc-roku-breakout/")
+  console.log(post)
+
   try {
     return new Response("OK", { status: 200 });
   } catch (e) {

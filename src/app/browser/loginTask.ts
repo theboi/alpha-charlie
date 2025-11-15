@@ -6,6 +6,8 @@ const redis = Redis.fromEnv();
 
 export class LoginTask extends Task {
   async execute(): Promise<void> {
+    await this.page.goto(k.BASE_URL)
+
     const ctx = this.page.context()
 
     const loggedInKey = (await redis.keys("wordpress_logged_in*"))[0]
@@ -15,8 +17,8 @@ export class LoginTask extends Task {
     if (!!loggedInKey && !!secKey) {
       console.log("Redis cookies persisted.")
       await ctx.addCookies([
-        { name: loggedInKey, value: String(redis.get(loggedInKey)), url: k.BASE_URL },
-        { name: secKey, value: String(redis.get(secKey)), url: k.BASE_URL }
+        { name: loggedInKey, value: String(await redis.get(loggedInKey)), url: k.BASE_URL },
+        { name: secKey, value: String(await redis.get(secKey)), url: k.BASE_URL }
       ])
       return
     }
@@ -24,7 +26,6 @@ export class LoginTask extends Task {
     // 2) No saved cookies
     console.log("Refreshing cookies and persisting in Redis.")
     await this.page.goto(new URL('/my-account/edit-account/', k.BASE_URL).toString())
-    await this.page.screenshot({ path: `${k.CWD_PATH}/screenshot.png` });
 
     const username = process.env.WP_USERNAME
     const password = process.env.WP_PASSWORD
@@ -33,12 +34,11 @@ export class LoginTask extends Task {
     await this.page.locator('.entry-content #username').fill(username)
     await this.page.locator('.entry-content #password').fill(password)
     await this.page.locator('.entry-content #rememberme').check()
+    console.log("LOGGING IN!")
     await this.page.locator('.entry-content [type=submit]').click()
 
     // Wait for logged-in state (network idle as a basic heuristic)
     await this.page.waitForLoadState("load")
-
-    await this.page.screenshot({ path: `${k.CWD_PATH}/screenshot.png` });
 
     // collect cookies and persist wordpress_* cookies to Redis
     const cookies = await ctx.cookies()
